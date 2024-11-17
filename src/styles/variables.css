@@ -1,0 +1,21 @@
+:root {
+  /* 主要配色 */
+  --color-bg: #FCF6E9;
+  --color-text: #4A3728;
+  --color-text-light: #926F5B;
+  --color-card: #FFFFFF;
+  
+  /* 功能配色 */
+  --color-line: rgba(146, 111, 91, 0.7);
+  --color-success: #4CAF50;
+  --color-error: #FF5252;
+  --color-hint: #FFB800;
+  
+  /* 动画时间 */
+  --animation-duration-fast: 0.2s;
+  --animation-duration-normal: 0.3s;
+  --animation-duration-slow: 0.5s;
+  
+  /* 动画曲线 */
+  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+} 

@@ -1,0 +1,15 @@
+.timer {
+  font-size: 1.125rem;
+  color: #926F5B;
+  background: rgba(146, 111, 91, 0.1);
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  font-size: 1.25rem;
+} 

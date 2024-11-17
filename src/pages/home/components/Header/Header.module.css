@@ -1,0 +1,43 @@
+.header {
+  text-align: center;
+  padding: 1rem;
+  margin-top: -4rem;
+}
+
+.titleWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mainTitle {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #4A3728;
+  margin: 0;
+  letter-spacing: 0.1em;
+}
+
+.subTitle {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #926F5B;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .header {
+    margin-top: -3rem;
+  }
+  
+  .mainTitle {
+    font-size: 2.5rem;
+  }
+
+  .subTitle {
+    font-size: 1rem;
+  }
+} 

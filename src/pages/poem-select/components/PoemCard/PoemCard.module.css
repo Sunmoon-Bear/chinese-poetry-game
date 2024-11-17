@@ -1,0 +1,93 @@
+.card {
+  background: rgba(252, 246, 233, 0.9);
+  border-radius: 12px;
+  padding: 1.6rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 4px rgba(146, 111, 91, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  height: 160px;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(146, 111, 91, 0.15);
+}
+
+.card.selected {
+  height: auto;
+  border: 2px solid #926F5B;
+  background: rgba(255, 250, 242, 0.95);
+  gap: 0.6rem;
+}
+
+.title {
+  color: #4A3728;
+  font-size: 1.4rem;
+  margin: 0;
+  font-family: "Noto Serif SC", serif;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #926F5B;
+  font-size: 1rem;
+}
+
+.content {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(146, 111, 91, 0.2);
+}
+
+.poemLine {
+  color: #4A3728;
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.difficulty {
+  color: #FFB800;
+  font-size: 0.9rem;
+}
+
+.checkmark {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 24px;
+  height: 24px;
+  background: #926F5B;
+  color: #FCF6E9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.selected .checkmark {
+  opacity: 1;
+  transform: scale(1);
+} 
