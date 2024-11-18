@@ -25,7 +25,9 @@ const LineCanvas = ({ points, gridSize, completedLines }: Props) => {
     
     const totalPadding = 64;
     const availableSpace = canvas.width - totalPadding;
-    const gap = 20;
+    const isMobile = window.innerWidth <= 768;
+    const gap = isMobile ? 40 : 20;
+    const lineWidth = isMobile ? 12 : 24;
     const cellSize = (availableSpace - (gap * (gridSize - 1))) / gridSize;
     const startOffset = totalPadding / 2;
 
@@ -37,10 +39,10 @@ const LineCanvas = ({ points, gridSize, completedLines }: Props) => {
     // 绘制已完成的线条
     if (completedLines && completedLines.length > 0) {
       ctx.strokeStyle = '#8B4513';  // 深棕色
-      ctx.lineWidth = 24;
+      ctx.lineWidth = lineWidth;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.globalAlpha = 0.7;
+      ctx.globalAlpha = isMobile ? 0.9 : 0.8;
 
       completedLines.forEach(line => {
         if (line.length < 2) return;
@@ -60,10 +62,10 @@ const LineCanvas = ({ points, gridSize, completedLines }: Props) => {
     // 绘制当前连线
     if (points.length > 1) {
       ctx.strokeStyle = '#926F5B';
-      ctx.lineWidth = 24;
+      ctx.lineWidth = lineWidth;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.globalAlpha = 0.7;
+      ctx.globalAlpha = isMobile ? 0.9 : 0.8;
 
       ctx.beginPath();
       const startPos = getCenterPosition(points[0]);

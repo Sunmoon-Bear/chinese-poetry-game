@@ -218,6 +218,15 @@
   
     .gameArea {
         padding: 0 0.5rem;
+        --grid-gap: 24px;
+    }
+  
+    .cell {
+        font-size: 1.2rem;
+        width: calc((100% - var(--grid-gap) * (var(--grid-size) - 1)) / var(--grid-size));
+        height: calc((100% - var(--grid-gap) * (var(--grid-size) - 1)) / var(--grid-size));
+        margin: calc(var(--grid-gap) / 2);
+        touch-action: none;
     }
   
     .title {

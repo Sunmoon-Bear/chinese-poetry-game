@@ -174,10 +174,23 @@ const GameGrid: React.FC<GameGridProps> = ({
 
   // 判断连线是否有效
   const isValidConnection = (p1: Point, p2: Point): boolean => {
-    const maxDistance = difficulty === 1 ? 1 : difficulty === 2 ? 2 : 3;
     const xDiff = Math.abs(p1.x - p2.x);
     const yDiff = Math.abs(p1.y - p2.y);
-    return xDiff <= maxDistance && yDiff <= maxDistance;
+    
+    // 移动端使用更宽松的判定
+    if (window.innerWidth <= 768) {
+      // 允许2格以内的所有连接
+      return Math.max(xDiff, yDiff) <= 2;
+    }
+    
+    // PC端保持原有逻辑
+    if (xDiff <= 1 && yDiff <= 1) {
+      return true;
+    }
+    
+    const maxDistance = difficulty === 1 ? 1 : difficulty === 2 ? 1.5 : 2;
+    const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+    return distance <= maxDistance;
   };
 
   // 统一处理结束选择
@@ -243,18 +256,38 @@ const GameGrid: React.FC<GameGridProps> = ({
     const rect = gridRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    // 计算相对于网格的坐标
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
     
-    // 计算触摸点所在的格子
     const cellSize = rect.width / gridSize;
+    const tolerance = cellSize * 0.3; // 减小判定区域到30%
+    
+    // 计算实际的网格坐标
     const gridX = Math.floor(x / cellSize);
     const gridY = Math.floor(y / cellSize);
     
-    // 确保坐标在有效范围内
-    if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
+    // 计算触摸点在单元格内的相对位置
+    const cellX = x - (gridX * cellSize);
+    const cellY = y - (gridY * cellSize);
+    
+    // 只有当触摸点足够接近字符中心时才触发连接
+    const centerX = cellSize / 2;
+    const centerY = cellSize / 2;
+    const distance = Math.sqrt(
+      Math.pow(cellX - centerX, 2) + 
+      Math.pow(cellY - centerY, 2)
+    );
+    
+    if (distance <= cellSize * 0.4 && // 只在字符周围40%的区域内触发
+        gridX >= 0 && gridX < gridSize && 
+        gridY >= 0 && gridY < gridSize) {
       const char = chars[gridY * gridSize + gridX];
+      
+      const lastPoint = selectedPoints[selectedPoints.length - 1];
+      if (lastPoint && lastPoint.x === gridX && lastPoint.y === gridY) {
+        return;
+      }
+      
       handleMove(char, gridX, gridY);
     }
   };
