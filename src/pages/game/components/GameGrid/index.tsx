@@ -234,19 +234,28 @@ const GameGrid: React.FC<GameGridProps> = ({
     }
   };
 
-  // 添加触摸移动处理
+  // 修改触摸移动处理
   const handleTouchMove = (e: React.TouchEvent) => {
     e.preventDefault();
     if (!isSelecting) return;
 
     const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    const rect = gridRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    // 计算相对于网格的坐标
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
     
-    if (element && element.classList.contains(styles.cell)) {
-      const x = parseInt(element.getAttribute('data-x') || '0');
-      const y = parseInt(element.getAttribute('data-y') || '0');
-      const char = chars[y * gridSize + x];
-      handleMove(char, x, y);
+    // 计算触摸点所在的格子
+    const cellSize = rect.width / gridSize;
+    const gridX = Math.floor(x / cellSize);
+    const gridY = Math.floor(y / cellSize);
+    
+    // 确保坐标在有效范围内
+    if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
+      const char = chars[gridY * gridSize + gridX];
+      handleMove(char, gridX, gridY);
     }
   };
 
@@ -258,10 +267,19 @@ const GameGrid: React.FC<GameGridProps> = ({
         ${showError ? styles.errorShake : ''} 
         ${showSuccess ? styles.successFlash : ''}
       `}
+      onMouseDown={(e) => {
+        e.preventDefault();  // 防止文字选择
+      }}
       onMouseUp={handleSelectionEnd}
       onMouseLeave={handleSelectionEnd}
-      onTouchEnd={handleSelectionEnd}
+      onTouchStart={(e) => {
+        e.preventDefault();  // 防止页面滚动
+      }}
       onTouchMove={handleTouchMove}
+      onTouchEnd={(e) => {
+        e.preventDefault();
+        handleSelectionEnd();
+      }}
     >
       <div 
         className={`
