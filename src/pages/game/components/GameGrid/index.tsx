@@ -12,7 +12,7 @@ interface GameGridProps {
   content: string;
   difficulty: number;
   currentRound: number;
-  onLineComplete: (line: string) => void;
+  onLineComplete: (isCorrect: boolean) => void;
 }
 
 const GameGrid: React.FC<GameGridProps> = ({ 
@@ -234,6 +234,22 @@ const GameGrid: React.FC<GameGridProps> = ({
     }
   };
 
+  // 添加触摸移动处理
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (!isSelecting) return;
+
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (element && element.classList.contains(styles.cell)) {
+      const x = parseInt(element.getAttribute('data-x') || '0');
+      const y = parseInt(element.getAttribute('data-y') || '0');
+      const char = chars[y * gridSize + x];
+      handleMove(char, x, y);
+    }
+  };
+
   return (
     <div 
       ref={gridRef}
@@ -245,6 +261,7 @@ const GameGrid: React.FC<GameGridProps> = ({
       onMouseUp={handleSelectionEnd}
       onMouseLeave={handleSelectionEnd}
       onTouchEnd={handleSelectionEnd}
+      onTouchMove={handleTouchMove}
     >
       <div 
         className={`
@@ -271,6 +288,8 @@ const GameGrid: React.FC<GameGridProps> = ({
             <div
               key={`${char}-${x}-${y}`}
               className={`${styles.cell} ${isSelected ? styles.selected : ''} ${isCompleted ? styles.completed : ''} ${isSuccessful ? styles.success : ''}`}
+              data-x={x}
+              data-y={y}
               onMouseDown={() => handleStart(char, x, y)}
               onMouseEnter={() => handleMove(char, x, y)}
               onTouchStart={(e) => {

@@ -16,24 +16,6 @@ interface Props {
 const LineCanvas = ({ points, gridSize, completedLines }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const drawArrow = (ctx: CanvasRenderingContext2D, from: {x: number, y: number}, to: {x: number, y: number}) => {
-    const headLength = 15;
-    const angle = Math.atan2(to.y - from.y, to.x - from.x);
-    
-    ctx.beginPath();
-    ctx.moveTo(to.x, to.y);
-    ctx.lineTo(
-      to.x - headLength * Math.cos(angle - Math.PI / 6),
-      to.y - headLength * Math.sin(angle - Math.PI / 6)
-    );
-    ctx.moveTo(to.x, to.y);
-    ctx.lineTo(
-      to.x - headLength * Math.cos(angle + Math.PI / 6),
-      to.y - headLength * Math.sin(angle + Math.PI / 6)
-    );
-    ctx.stroke();
-  };
-
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');

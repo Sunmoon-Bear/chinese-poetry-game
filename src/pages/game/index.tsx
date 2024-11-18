@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { poems } from '../../data/poems';
 import GameGrid from './components/GameGrid';
@@ -19,7 +19,6 @@ const GamePage = () => {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [totalTime, setTotalTime] = useState<number>(0);
   const [isGameCompleted, setIsGameCompleted] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   
   // 更新计时器逻辑
   useEffect(() => {
@@ -39,25 +38,21 @@ const GamePage = () => {
     .filter(line => line.length > 0)
     .map(line => line.replace(/[，。！？；：]/g, '')) || [];
 
-  const handleLineComplete = useCallback((isCorrect: boolean) => {
-    if (!isCorrect || isUpdating) return;
-    
-    setIsUpdating(true);
-    
-    if (currentRound === poemLines.length - 1) {
-      setIsGameCompleted(true);
-      setTotalTime(Date.now() - startTime);
-      setShowCompletionModal(true);
-      setIsUpdating(false);
-    } else {
-      // 确保只增加一个回合
-      setCurrentRound(prevRound => {
-        const nextRound = prevRound + 1;
-        setIsUpdating(false);
-        return nextRound;
-      });
+  const handleLineComplete = (isCorrect: boolean) => {
+    if (isCorrect) {
+      const nextRound = currentRound + 1;
+      
+      // 检查是否完成所有回合
+      if (nextRound >= poemLines.length) {
+        setTotalTime(Date.now() - startTime);
+        setIsGameCompleted(true);
+        setShowCompletionModal(true);
+        return;
+      }
+      
+      setCurrentRound(nextRound);
     }
-  }, [currentRound, poemLines.length, startTime, isUpdating]);
+  };
 
   const handleReset = () => {
     setShowCompletionModal(false);
