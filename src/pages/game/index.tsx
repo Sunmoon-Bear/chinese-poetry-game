@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { poems } from '../../data/poems';
 import GameGrid from './components/GameGrid';
-import ProgressBar from './components/ProgressBar';
 import CompletionModal from './components/CompletionModal';
 import DecorativeBackground from './components/DecorativeBackground';
 import Timer from './components/Timer';
@@ -14,53 +13,59 @@ const GamePage = () => {
   const poem = poems.find(p => p.id === Number(id));
   
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [completedLines, setCompletedLines] = useState<string[]>([]);
   const [currentRound, setCurrentRound] = useState(0);
   const [shuffleCount, setShuffleCount] = useState(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [totalTime, setTotalTime] = useState<number>(0);
+  const [isGameCompleted, setIsGameCompleted] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   
-  // 添加计时器效果
+  // 更新计时器逻辑
   useEffect(() => {
+    // 如果游戏已完成，不启动计时器
+    if (isGameCompleted) return;
+
     const timer = setInterval(() => {
-      setCurrentTime(Date.now() - startTime);
-    }, 1000);
+      const now = Date.now();
+      setCurrentTime(now - startTime);
+    }, 100);
     
     return () => clearInterval(timer);
-  }, [startTime]);
+  }, [startTime, isGameCompleted]);
   
   const poemLines = poem?.content
     .split(/[，。]/)  // 同时以逗号和句号分割
     .filter(line => line.length > 0)
     .map(line => line.replace(/[，。！？；：]/g, '')) || [];
 
-  const handleLineComplete = useCallback((line: string) => {
-    const currentPoemLine = poemLines[currentRound];
+  const handleLineComplete = useCallback((isCorrect: boolean) => {
+    if (!isCorrect || isUpdating) return;
     
-    if (line === currentPoemLine) {
-      setCompletedLines(prev => [...prev, line]);
-      
-      setTimeout(() => {
-        setCurrentRound(prevRound => {
-          if (prevRound === poemLines.length - 1) {
-            setTotalTime(Date.now() - startTime);
-            setShowCompletionModal(true);
-            return prevRound;
-          }
-          return prevRound + 1;
-        });
-      }, 1500);
+    setIsUpdating(true);
+    
+    if (currentRound === poemLines.length - 1) {
+      setIsGameCompleted(true);
+      setTotalTime(Date.now() - startTime);
+      setShowCompletionModal(true);
+      setIsUpdating(false);
+    } else {
+      // 确保只增加一个回合
+      setCurrentRound(prevRound => {
+        const nextRound = prevRound + 1;
+        setIsUpdating(false);
+        return nextRound;
+      });
     }
-  }, [poemLines, currentRound, startTime]);
+  }, [currentRound, poemLines.length, startTime, isUpdating]);
 
   const handleReset = () => {
-    setCompletedLines([]);
-    setCurrentRound(0);
     setShowCompletionModal(false);
     setStartTime(Date.now());
     setCurrentTime(0);
     setTotalTime(0);
+    setCurrentRound(0);
+    setIsGameCompleted(false);
   };
 
   const handleBack = () => {
@@ -70,6 +75,20 @@ const GamePage = () => {
   const handleShuffle = () => {
     setShuffleCount(prev => prev + 1);
   };
+
+  // 添加触摸事件处理
+  useEffect(() => {
+    const preventDefault = (e: Event) => {
+      e.preventDefault();
+    };
+
+    // 阻止默认的触摸行为
+    document.body.addEventListener('touchmove', preventDefault, { passive: false });
+    
+    return () => {
+      document.body.removeEventListener('touchmove', preventDefault);
+    };
+  }, []);
 
   if (!poem) {
     return <div className={styles.error}>诗词不存在</div>;
@@ -106,7 +125,6 @@ const GamePage = () => {
             difficulty={poem.difficulty}
             currentRound={currentRound}
             onLineComplete={handleLineComplete}
-            onShuffle={handleShuffle}
           />
         </main>
         

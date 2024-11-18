@@ -78,6 +78,7 @@
   background: #8B4513;
   border-color: #8B4513;
   color: #FCF6E9;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .line {
@@ -111,24 +112,34 @@
 }
 
 .cell.success {
-  animation: successPulse 0.5s ease-in-out;
-  background: #8B4513;
-  border-color: #8B4513;
-  color: #FCF6E9;
+  animation: successPulse 0.8s cubic-bezier(0.2, 1.8, 0.3, 0.9) forwards;
+  z-index: 2;
 }
 
 @keyframes successPulse {
   0% {
-    transform: scale(1);
-    background: rgba(252, 246, 233, 0.95);
+    transform: scale(1.1);
+    background: #926F5B;
+    border-color: #926F5B;
+    color: #FCF6E9;
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(0.95);
     background: #8B4513;
+    border-color: #8B4513;
+    color: #FCF6E9;
+  }
+  80% {
+    transform: scale(1.02);
+    background: #8B4513;
+    border-color: #8B4513;
+    color: #FCF6E9;
   }
   100% {
     transform: scale(1);
     background: #8B4513;
+    border-color: #8B4513;
+    color: #FCF6E9;
   }
 }
 

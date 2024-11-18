@@ -13,24 +13,22 @@ interface GameGridProps {
   difficulty: number;
   currentRound: number;
   onLineComplete: (line: string) => void;
-  onShuffle: () => void;
 }
 
 const GameGrid: React.FC<GameGridProps> = ({ 
   content, 
   difficulty, 
   currentRound, 
-  onLineComplete,
-  onShuffle 
+  onLineComplete 
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [gridSize, setGridSize] = useState(4);
   const [chars, setChars] = useState<string[]>([]);
   const [selectedPoints, setSelectedPoints] = useState<Point[]>([]);
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [completedChars, setCompletedChars] = useState<string[]>([]);
-  const [showError, setShowError] = useState(false);
   const [completedLines, setCompletedLines] = useState<Point[][]>([]);
+  const [completedChars, setCompletedChars] = useState<string[]>([]);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successPoints, setSuccessPoints] = useState<Point[]>([]);
 
@@ -40,9 +38,9 @@ const GameGrid: React.FC<GameGridProps> = ({
     setIsSelecting(false);
     setCompletedChars([]);
     setShowError(false);
-    setCompletedLines([]);
     setShowSuccess(false);
     setSuccessPoints([]);
+    setCompletedLines([]);
   }, []);
 
   // 监听回合变化
@@ -182,104 +180,58 @@ const GameGrid: React.FC<GameGridProps> = ({
     return xDiff <= maxDistance && yDiff <= maxDistance;
   };
 
-  // 添加触摸事件处理
-  const handleTouchStart = (char: string, x: number, y: number) => {
-    if (completedChars.includes(char)) return;
-    
-    setIsSelecting(true);
-    setSelectedPoints([{ x, y, char }]);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isSelecting) return;
-    
-    const gridElement = gridRef.current;
-    if (!gridElement) return;
-
-    const rect = gridElement.getBoundingClientRect();
-    const touch = e.touches[0];
-    
-    // 计算触摸点在网格中的相对位置
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    
-    // 计算对应的网格坐标
-    const cellSize = rect.width / gridSize;
-    const gridX = Math.floor(x / cellSize);
-    const gridY = Math.floor(y / cellSize);
-    
-    // 确保坐标在有效范围内
-    if (gridX >= 0 && gridX < gridSize && gridY >= 0 && gridY < gridSize) {
-      const index = gridY * gridSize + gridX;
-      const char = chars[index];
-      
-      handleCellMouseEnter(char, gridX, gridY);
+  // 统一处理结束选择
+  const handleSelectionEnd = () => {
+    if (!isSelecting || selectedPoints.length < 2) {
+      setSelectedPoints([]);
+      setIsSelecting(false);
+      return;
     }
-  };
 
-  const handleTouchEnd = () => {
-    handleCellMouseUp();
-  };
-
-  const handleCellMouseDown = (char: string, x: number, y: number) => {
-    if (completedChars.includes(char)) return;
-    
-    setIsSelecting(true);
-    setSelectedPoints([{ x, y, char }]);
-  };
-
-  const handleCellMouseEnter = (char: string, x: number, y: number) => {
-    if (!isSelecting || completedChars.includes(char)) return;
-
-    const lastPoint = selectedPoints[selectedPoints.length - 1];
-    if (!lastPoint || !isValidConnection(lastPoint, { x, y })) return;
-
-    const currentLine = content
+    const selectedChars = selectedPoints.map(p => chars[p.y * gridSize + p.x]);
+    const currentLineChars = content
       .split(/[，。]/)
       .filter(line => line.length > 0)
       .map(line => line.replace(/[，。！？；：]/g, ''))[currentRound];
+    
+    const isCorrect = selectedChars.join('') === currentLineChars;
+    
+    if (isCorrect) {
+      setCompletedLines(prev => [...prev, [...selectedPoints]]);
+      setCompletedChars(prev => [...prev, ...selectedChars]);
+      setShowSuccess(true);
+      setIsSelecting(false);
+      
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+        setSelectedPoints([]);
+        onLineComplete(true);
+      }, 800); // 改为0.8秒
 
-    // 检查是否是当前诗句的下一个字
-    const nextCharIndex = selectedPoints.length;
-    if (char === currentLine[nextCharIndex]) {
-      setSelectedPoints(prev => [...prev, { x, y, char }]);
+      return () => clearTimeout(timer);
+    } else {
+      setSelectedPoints([]);
+      setIsSelecting(false);
     }
   };
 
-  const handleCellMouseUp = () => {
-    if (!isSelecting) return;
-    
-    const selectedLine = selectedPoints.map(p => p.char).join('');
-    const lines = content
-      .split(/[，。]/)
-      .filter(line => line.length > 0)
-      .map(line => line.replace(/[，。！？；：]/g, ''));
-    
-    const currentLine = lines[currentRound];
+  // 处理鼠标/触摸开始
+  const handleStart = (char: string, x: number, y: number) => {
+    if (completedChars.includes(char)) return;
+    setIsSelecting(true);
+    setSelectedPoints([{ x, y, char }]);
+  };
 
-    if (selectedLine === currentLine) {
-      setSuccessPoints(selectedPoints);
-      setShowSuccess(true);
-      setCompletedLines(prev => [...prev, selectedPoints]);
-      setCompletedChars(prev => [...prev, ...selectedPoints.map(p => p.char)]);
-      
-      setTimeout(() => {
-        onLineComplete(selectedLine);
-        setSuccessPoints([]);
-        setShowSuccess(false);
-      }, 500);
-    } else {
-      // 连线失败
-      setShowError(true);
-      setTimeout(() => {
-        setShowError(false);
-        setSelectedPoints([]);
-        setIsSelecting(false);
-      }, 500);
-    }
+  // 处理移动
+  const handleMove = (char: string, x: number, y: number) => {
+    if (!isSelecting || completedChars.includes(char)) return;
     
-    setSelectedPoints([]);
-    setIsSelecting(false);
+    const lastPoint = selectedPoints[selectedPoints.length - 1];
+    if (lastPoint && isValidConnection(lastPoint, { x, y })) {
+      if (!selectedPoints.some(p => p.x === x && p.y === y)) {
+        setSelectedPoints(prev => [...prev, { x, y, char }]);
+      }
+    }
   };
 
   return (
@@ -290,14 +242,9 @@ const GameGrid: React.FC<GameGridProps> = ({
         ${showError ? styles.errorShake : ''} 
         ${showSuccess ? styles.successFlash : ''}
       `}
-      onMouseLeave={handleCellMouseUp}
-      onMouseUp={handleCellMouseUp}
-      onTouchStart={(e) => e.preventDefault()}
-      onTouchMove={(e) => {
-        e.preventDefault();
-        handleTouchMove(e);
-      }}
-      onTouchEnd={handleTouchEnd}
+      onMouseUp={handleSelectionEnd}
+      onMouseLeave={handleSelectionEnd}
+      onTouchEnd={handleSelectionEnd}
     >
       <div 
         className={`
@@ -310,22 +257,26 @@ const GameGrid: React.FC<GameGridProps> = ({
       >
         <LineCanvas 
           points={selectedPoints}
-          completedLines={completedLines}
           gridSize={gridSize}
+          completedLines={completedLines}
         />
         {chars.map((char, index) => {
           const x = index % gridSize;
           const y = Math.floor(index / gridSize);
           const isSelected = selectedPoints.some(p => p.x === x && p.y === y);
           const isCompleted = completedChars.includes(char);
+          const isSuccessful = showSuccess && isSelected;
 
           return (
             <div
               key={`${char}-${x}-${y}`}
-              className={`${styles.cell} ${isSelected ? styles.selected : ''} ${isCompleted ? styles.completed : ''}`}
-              onMouseDown={() => handleCellMouseDown(char, x, y)}
-              onMouseEnter={() => handleCellMouseEnter(char, x, y)}
-              onTouchStart={() => handleTouchStart(char, x, y)}
+              className={`${styles.cell} ${isSelected ? styles.selected : ''} ${isCompleted ? styles.completed : ''} ${isSuccessful ? styles.success : ''}`}
+              onMouseDown={() => handleStart(char, x, y)}
+              onMouseEnter={() => handleMove(char, x, y)}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                handleStart(char, x, y);
+              }}
             >
               {char}
             </div>

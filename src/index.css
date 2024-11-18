@@ -14,6 +14,11 @@
 
 body {
   margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
   font-family: 'Noto Serif SC', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -23,6 +28,9 @@ body {
 }
 
 #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   min-height: 100vh;
 }
 
@@ -31,4 +39,13 @@ button {
   cursor: pointer;
   border: none;
   outline: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

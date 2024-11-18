@@ -4,11 +4,10 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 3000,
-    hmr: {
-      overlay: false
-    }
-  },
-  base: '/chinese-poetry-game/'
+  base: '/chinese-poetry-game/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    minify: 'esbuild'
+  }
 })
