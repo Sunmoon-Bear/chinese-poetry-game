@@ -260,7 +260,6 @@ const GameGrid: React.FC<GameGridProps> = ({
     const y = touch.clientY - rect.top;
     
     const cellSize = rect.width / gridSize;
-    const tolerance = cellSize * 0.3; // 减小判定区域到30%
     
     // 计算实际的网格坐标
     const gridX = Math.floor(x / cellSize);
@@ -278,7 +277,7 @@ const GameGrid: React.FC<GameGridProps> = ({
       Math.pow(cellY - centerY, 2)
     );
     
-    if (distance <= cellSize * 0.4 && // 只在字符周围40%的区域内触发
+    if (distance <= cellSize * 0.3 && // 只在字符周围40%的区域内触发
         gridX >= 0 && gridX < gridSize && 
         gridY >= 0 && gridY < gridSize) {
       const char = chars[gridY * gridSize + gridX];
